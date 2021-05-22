@@ -73,7 +73,7 @@ void setup() {
     Serial.println("POWER OK");
   }
 
-  // Only used once, then disabled
+  // uncomment if you want to manually set date/time - otherwise use buttons
   //  RTCLib::set(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)
   //    rtc.set(30, 45, 16, 1, 9, 2, 21);
 
@@ -92,6 +92,7 @@ void setup() {
   display.println("- President Nelson");
   display.display();
   storeDisplay();
+  delay(500);
 }
 
 void loop() {
@@ -169,16 +170,22 @@ void detail(Adafruit_SSD1306 *display, int fahrenheit, int hour, int minute, int
   display->print(" F");
 
   display->setTextSize(3);
+  
   display->setCursor(0, 22);
-  //  if (hour < 10) display->print('0');
-  if (hour >= 13) display->print(hour - 12);
+  if (hour > 12) display->print(hour - 12);
   else if (hour == 0) display->print(12);
   else display->print(hour);
+  
+  const bool longHour = hour > 12 ? hour - 12 >= 10 : hour >= 10;
+  if (longHour) display->setCursor(32, 22);
   display->print(':');
+  if (longHour) display->setCursor(44, 22);
 
   if (minute < 10) display->print('0');
   display->print(minute);
+  if (longHour) display->setCursor(74, 22);
   display->print(':');
+  if (longHour) display->setCursor(88, 22);
 
   if (second < 10) display->print('0');
   display->print(second);
@@ -188,7 +195,13 @@ void detail(Adafruit_SSD1306 *display, int fahrenheit, int hour, int minute, int
   if (hour >= 12) display->print("PM");
   else display->print("AM");
 
-  if (!resetMode) {
+  // Serial.print(hour);
+  // Serial.print(':');
+  // Serial.print(minute);
+  // Serial.print(':');
+  // Serial.println(second);
+
+  if (resetMode) {
     display->drawPixel(0, 0, WHITE);
     display->drawPixel(127, 0, WHITE);
     display->drawPixel(0, 63, WHITE);
